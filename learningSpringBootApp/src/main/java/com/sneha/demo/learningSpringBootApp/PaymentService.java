@@ -1,45 +1,45 @@
 package com.sneha.demo.learningSpringBootApp;
 
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class PaymentService {
 
-    private final List<Payment> payments = new ArrayList<>();
+    private final PaymentRepository paymentRepository;
 
-    // CREATE (POST)
+    public PaymentService(PaymentRepository paymentRepository) {
+        this.paymentRepository = paymentRepository;
+    }
+
     public Payment addPayment(Payment payment) {
-        payments.add(payment);
-        return payment;
+        return paymentRepository.save(payment);
     }
 
-    // READ ALL (GET)
     public List<Payment> getAllPayments() {
-        return payments;
+        return paymentRepository.findAll();
     }
 
-    // READ ONE (GET)
-    public Payment getPaymentById(int id) {
-        return payments.stream()
-                .filter(p -> p.getId() == id)
-                .findFirst()
-                .orElse(null);
+    public Payment getPaymentById(Integer id) {
+        return paymentRepository.findById(id).orElse(null);
     }
 
-    // UPDATE (PUT)
     public Payment updatePayment(Integer id, Payment updatedPayment) {
-        Payment existing = getPaymentById(id);
+        Payment existing = paymentRepository.findById(id).orElse(null);
+
         if (existing != null) {
             existing.setType(updatedPayment.getType());
             existing.setAmount(updatedPayment.getAmount());
+            return paymentRepository.save(existing);
         }
-        return existing;
+        return null;
     }
 
-    // DELETE (DELETE)
-    public boolean deletePayment(int id) {
-        return payments.removeIf(p -> p.getId() == id);
+    public boolean deletePayment(Integer id) {
+        if (paymentRepository.existsById(id)) {
+            paymentRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }
